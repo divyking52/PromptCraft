@@ -8,6 +8,7 @@ function App() {
   const [loading, setLoading] = useState(false);
   const [copied, setCopied] = useState(false);
   const [history, setHistory] = useState([]);
+  const [image, setImage] = useState("");
 
   const examples = [
     "A poster for my juice shop's monsoon offer",
@@ -20,6 +21,7 @@ function App() {
     if (!prompt.trim()) return;
 
     setLoading(true);
+    setImage("");
 
     try {
       const response = await fetch(`${import.meta.env.VITE_API_URL}/enhance`, {
@@ -31,8 +33,10 @@ function App() {
       });
 
       const data = await response.json();
+      
 
       setEnhancedPrompt(data.enhancedPrompt);
+      setImage(data.imageUrl);
 
       setHistory((prev) => [
         {
@@ -73,7 +77,12 @@ function App() {
 
   URL.revokeObjectURL(url);
 }
-
+function downloadImage() {
+  const link = document.createElement("a");
+  link.href = image;
+  link.download = "generated-image.png";
+  link.click();
+}
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-900 via-black to-slate-900 flex items-center justify-center p-8">
       <div className="w-full max-w-5xl bg-white/10 backdrop-blur-xl rounded-3xl border border-white/10 shadow-2xl p-10">
@@ -184,7 +193,29 @@ function App() {
               {enhancedPrompt}
             </div>
           </motion.div>
-        )}
+        )}{image && (
+  <div className="mt-10">
+    <div className="flex justify-between items-center mb-4">
+      <h2 className="text-2xl font-bold text-white">
+        Generated Image
+      </h2>
+
+      <button
+        onClick={downloadImage}
+        className="bg-purple-600 hover:bg-purple-700 px-4 py-2 rounded-lg text-white"
+      >
+        Download Image
+      </button>
+    </div>
+
+    <img
+      src={image}
+      alt="Generated"
+      className="w-full rounded-xl border border-slate-700 shadow-lg"
+    />
+  </div>
+)}
+
 
         {/* History */}
         {history.length > 0 && (
